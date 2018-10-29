@@ -2,13 +2,51 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:LibVlcSharpTest"
+             xmlns:shared="clr-namespace:LibVLCSharp.Forms.Shared;assembly=LibVLCSharp.Forms"
              x:Class="LibVlcSharpTest.MainPage">
 
-    <StackLayout>
-        <!-- Place new controls here -->
-        <Label Text="Welcome to Xamarin.Forms!" 
-           HorizontalOptions="Center"
-           VerticalOptions="CenterAndExpand" />
-    </StackLayout>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <shared:VideoView Grid.Row="0" x:Name="videoView" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand"/>
+
+        <Label Grid.Row="1" x:Name="VideoTitle" HorizontalOptions="CenterAndExpand"/>
+
+        <Grid Grid.Row="2">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Label Grid.Column="0" x:Name="MediaPlayerTime" Margin="5"/>
+
+            <Slider Grid.Column="1" x:Name="MediaPlayerTimeSlider" ValueChanged="MediaPlayerTimeSlider_OnValueChanged" 
+                    MinimumTrackColor="Gray" MaximumTrackColor="DimGray" ThumbColor="DimGray"
+                    Minimum="0" Maximum="1" IsEnabled="False"/>
+
+            <Label Grid.Column="2" x:Name="MediaPlayerLength" Margin="5"/>
+
+        </Grid>
+
+        <Grid Grid.Row="3">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="0" x:Name="PlayButton" Clicked="PlayButton_OnClicked" Text="Play" HorizontalOptions="FillAndExpand"/>
+            <Button Grid.Column="1" x:Name="PlayRandomButton" Clicked="PlayRandomButton_OnClicked" Text="Play Random" HorizontalOptions="FillAndExpand"/>
+            <Button Grid.Column="2" x:Name="StopButton" Clicked="StopButton_OnClicked" Text="Stop" HorizontalOptions="FillAndExpand"/>
+        </Grid>
+    </Grid>
 
 </ContentPage>
