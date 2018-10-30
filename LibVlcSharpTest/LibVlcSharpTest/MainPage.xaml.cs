@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using LibVlcSharpTest.Views;
 using LibVLCSharp.Shared;
 using Xamarin.Forms;
 
@@ -12,12 +13,12 @@ namespace LibVlcSharpTest
     public partial class MainPage : ContentPage
     {
         public MediaPlayer MediaPlayer => videoView.MediaPlayer;
+        public MediaPlayerTimeSliderView MediaPlayerTimeSlider => MediaPlayerTimeSliderProtected;
 
         private readonly List<Video> _playItems = Video.GetList();
 
         private int _lastRandom = -1;
         private bool _secondRun;
-        private bool _timeSliderValueChangedOutside;
 
         public MainPage()
         {
@@ -43,29 +44,28 @@ namespace LibVlcSharpTest
             MediaPlayer.EndReached += MediaPlayer_EndReached;
             MediaPlayer.EncounteredError += MediaPlayer_EncounteredError;
             MediaPlayer.LengthChanged += MediaPlayer_LengthChanged;
+
+            MediaPlayerTimeSlider.MainPage_OnAppearing();
         }
 
         private void MediaPlayer_MediaChanged(object sender, MediaPlayerMediaChangedEventArgs e)
         {
             Debug.WriteLine("Media Changed: " + MediaPlayer.Media.Mrl);
 
-            MediaPlayer.Media.StateChanged += Media_StateChanged; // This event never fired
+            MediaPlayer.Media.StateChanged += Media_StateChanged;
             MediaPlayer.Media.DurationChanged += Media_DurationChanged;
             MediaPlayer.Media.MetaChanged += Media_MetaChanged;
 
             MediaStopped();
         }
 
-        // This event handler never started
-        private void Media_StateChanged(object sender, MediaFreedEventArgs e)
+        private void Media_StateChanged(object sender, MediaStateChangedEventArgs e)
         {
-            Debug.Write("Media State: " + e.Media.State);
+            Debug.Write("Media State: " + e.State);
         }
 
         private void Media_DurationChanged(object sender, MediaDurationChangedEventArgs e)
         {
-            // Wrong value in e.Duration
-            // We are taking correct value directly from MediaPlayer.Length
             Debug.WriteLine("Media Duration: " + e.Duration);
         }
 
@@ -76,15 +76,9 @@ namespace LibVlcSharpTest
 
         private void MediaPlayer_TimeChanged(object sender, MediaPlayerTimeChangedEventArgs e)
         {
-            // Wrong value in e.Time
-            Debug.WriteLine("Time Changed: " + e.Time);
-
-            _timeSliderValueChangedOutside = true;
-
-            // We are taking correct value directly from MediaPlayer.Time
+            Debug.WriteLine("MainPage (I will be shown twice) Time Changed: " + e.Time);
+            
             Device.BeginInvokeOnMainThread(() => {
-                MediaPlayerTimeSlider.Value = MediaPlayer.Time;
-
                 MediaPlayerTime.Text = LongToTime(MediaPlayer.Time);
             });
         }
@@ -96,7 +90,6 @@ namespace LibVlcSharpTest
 
         private void MediaPlayer_Buffering(object sender, MediaPlayerBufferingEventArgs e)
         {
-            // Wrong value in e.Cache
             Debug.WriteLine("Buffering: " + e.Cache);
 
             MediaPlaying();
@@ -137,13 +130,11 @@ namespace LibVlcSharpTest
 
         private void MediaPlayer_LengthChanged(object sender, MediaPlayerLengthChangedEventArgs e)
         {
-            // Wrong value in e.Length
             Debug.WriteLine("Length Changed: " + e.Length);
-
-            // We are taking correct value directly from MediaPlayer.Length
+            
             Device.BeginInvokeOnMainThread(() => {
-                MediaPlayerTimeSlider.Maximum = MediaPlayer.Length;
-                MediaPlayerTimeSlider.IsEnabled = true;
+                MediaPlayerTimeSlider.Slider.Maximum = MediaPlayer.Length;
+                MediaPlayerTimeSlider.Slider.IsEnabled = true;
 
                 MediaPlayerLength.Text = LongToTime(MediaPlayer.Length);
             });
@@ -197,7 +188,6 @@ namespace LibVlcSharpTest
         private void StopButton_OnClicked(object sender, EventArgs e)
         {
             MediaPlayer.Stop();
-            PlayButton.Text = "Play";
         }
 
         private void MediaPlaying()
@@ -216,9 +206,9 @@ namespace LibVlcSharpTest
                 MediaPlayerTime.Text = "--:--";
                 MediaPlayerLength.Text = "--:--";
 
-                MediaPlayerTimeSlider.IsEnabled = false;
-                MediaPlayerTimeSlider.Maximum = 1;
-                MediaPlayerTimeSlider.Value = 0;
+                MediaPlayerTimeSlider.Slider.IsEnabled = false;
+                MediaPlayerTimeSlider.Slider.Maximum = 1;
+                MediaPlayerTimeSlider.Slider.Value = 0;
             });
         }
 
@@ -249,20 +239,6 @@ namespace LibVlcSharpTest
             }
 
             return value >= 3600 * 1000 ? $"{t.Hours:D2}:{t.Minutes:D2}:{t.Seconds:D2}" : $"{t.Minutes:D2}:{t.Seconds:D2}";
-        }
-        
-        private void MediaPlayerTimeSlider_OnValueChanged(object sender, ValueChangedEventArgs e)
-        {
-            if (_timeSliderValueChangedOutside)
-            {
-                _timeSliderValueChangedOutside = false;
-                return;
-            }
-
-            if (MediaPlayer.IsSeekable)
-            {
-                MediaPlayer.Time = (int)e.NewValue;
-            }
         }
 
         public class Video

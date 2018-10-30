@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:LibVlcSharpTest"
              xmlns:shared="clr-namespace:LibVLCSharp.Forms.Shared;assembly=LibVLCSharp.Forms"
+             xmlns:views="clr-namespace:LibVlcSharpTest.Views;assembly=LibVlcSharpTest"
              x:Class="LibVlcSharpTest.MainPage">
 
     <Grid>
@@ -27,9 +28,7 @@
 
             <Label Grid.Column="0" x:Name="MediaPlayerTime" Margin="5"/>
 
-            <Slider Grid.Column="1" x:Name="MediaPlayerTimeSlider" ValueChanged="MediaPlayerTimeSlider_OnValueChanged" 
-                    MinimumTrackColor="Gray" MaximumTrackColor="DimGray" ThumbColor="DimGray"
-                    Minimum="0" Maximum="1" IsEnabled="False"/>
+            <views:MediaPlayerTimeSliderView Grid.Column="1" x:Name="MediaPlayerTimeSliderProtected"/>
 
             <Label Grid.Column="2" x:Name="MediaPlayerLength" Margin="5"/>
 

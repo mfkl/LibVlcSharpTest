@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ContentView xmlns="http://xamarin.com/schemas/2014/forms" 
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="LibVlcSharpTest.Views.MediaPlayerTimeSliderView">
+  <ContentView.Content>
+
+      <Slider x:Name="SliderProtected" ValueChanged="MediaPlayerTimeSlider_OnValueChanged" 
+              MinimumTrackColor="Gray" MaximumTrackColor="DimGray" ThumbColor="DimGray"
+              Minimum="0" Maximum="1" IsEnabled="False"/>
+
+    </ContentView.Content>
+</ContentView>
