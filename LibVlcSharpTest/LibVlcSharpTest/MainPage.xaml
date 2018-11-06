@@ -7,6 +7,7 @@
              x:Class="LibVlcSharpTest.MainPage">
 
     <Grid>
+
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
@@ -40,12 +41,16 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
             <Button Grid.Column="0" x:Name="PlayButton" Clicked="PlayButton_OnClicked" Text="Play" HorizontalOptions="FillAndExpand"/>
             <Button Grid.Column="1" x:Name="PlayRandomButton" Clicked="PlayRandomButton_OnClicked" Text="Play Random" HorizontalOptions="FillAndExpand"/>
             <Button Grid.Column="2" x:Name="StopButton" Clicked="StopButton_OnClicked" Text="Stop" HorizontalOptions="FillAndExpand"/>
+            <Button Grid.Column="3" x:Name="OpenFileButton" Clicked="OpenFileButton_OnClicked" Text="Open File" HorizontalOptions="FillAndExpand"/>
+
         </Grid>
+
     </Grid>
 
 </ContentPage>
