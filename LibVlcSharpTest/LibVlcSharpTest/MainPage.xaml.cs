@@ -2,12 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using LibVlcSharpTest.Views;
 using LibVLCSharp.Shared;
-using Plugin.FilePicker;
-using Plugin.FilePicker.Abstractions;
 using Xamarin.Forms;
 
 namespace LibVlcSharpTest
@@ -29,6 +25,8 @@ namespace LibVlcSharpTest
 
         protected override void OnAppearing()
         {
+            Debug.WriteLine("OnAppearing");
+
             base.OnAppearing();
 
             // Exit method to avoid re-subscription
@@ -48,6 +46,13 @@ namespace LibVlcSharpTest
             MediaPlayer.LengthChanged += MediaPlayer_LengthChanged;
 
             MediaPlayerTimeSlider.MainPage_OnAppearing();
+        }
+
+        protected override void OnDisappearing()
+        {
+            Debug.WriteLine("OnDisappearing");
+            
+            MediaPlayer.Stop();
         }
 
         private void MediaPlayer_MediaChanged(object sender, MediaPlayerMediaChangedEventArgs e)
@@ -190,22 +195,6 @@ namespace LibVlcSharpTest
         private void StopButton_OnClicked(object sender, EventArgs e)
         {
             MediaPlayer.Stop();
-        }
-        
-        private async void OpenFileButton_OnClicked(object sender, EventArgs e)
-        {
-            try
-            {
-                FileData fileData = await CrossFilePicker.Current.PickFile();
-
-                if (fileData == null) return; 
-                
-                Debug.WriteLine("File name chosen: " + fileData.FileName);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine("Exception choosing file: " + ex);
-            }
         }
 
         private void MediaPlaying()
