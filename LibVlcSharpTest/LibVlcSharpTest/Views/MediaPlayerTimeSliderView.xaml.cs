@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
 using LibVLCSharp.Shared;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -16,21 +11,16 @@ namespace LibVlcSharpTest.Views
         private MainPage MainPage => (MainPage)Application.Current.MainPage;
 
         public Slider Slider => SliderProtected;
-
-        private bool _secondRun;
+        
         private bool _timeSliderValueChangedOutside;
 
-        public MediaPlayerTimeSliderView ()
+        public MediaPlayerTimeSliderView()
         {
-            InitializeComponent ();
+            InitializeComponent();
         }
 
-        public void MainPage_OnAppearing()
+        public void MainPage_OnMediaPlayerChanged()
         {
-            if (_secondRun) return;
-
-            _secondRun = true;
-            
             MainPage.MediaPlayer.TimeChanged += MediaPlayer_TimeChanged;
         }
 

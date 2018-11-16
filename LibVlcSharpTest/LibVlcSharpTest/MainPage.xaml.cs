@@ -47,8 +47,6 @@ namespace LibVlcSharpTest
             _secondRun = true;
             
             _mediaPlayerViewModel.Initialize();
-
-            MediaPlayerTimeSlider.MainPage_OnAppearing();
         }
 
         protected override void OnDisappearing()
@@ -77,6 +75,8 @@ namespace LibVlcSharpTest
             MediaPlayer.EndReached += MediaPlayer_EndReached;
             MediaPlayer.EncounteredError += MediaPlayer_EncounteredError;
             MediaPlayer.LengthChanged += MediaPlayer_LengthChanged;
+
+            MediaPlayerTimeSlider.MainPage_OnMediaPlayerChanged();
         }
 
         private void MediaPlayer_MediaChanged(object sender, MediaPlayerMediaChangedEventArgs e)
@@ -230,7 +230,6 @@ namespace LibVlcSharpTest
 
         private async void FileButton_OnClicked(object sender, EventArgs e)
         {
-
             if (Device.RuntimePlatform == Device.Android && !await CheckPermissionsAsync()) return;
 
             try
