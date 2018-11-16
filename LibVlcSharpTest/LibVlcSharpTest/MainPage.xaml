@@ -15,7 +15,9 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <shared:VideoView Grid.Row="0" x:Name="videoView" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand"/>
+        <shared:VideoView x:Name="VideoView" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand" 
+                          MediaPlayer="{Binding MediaPlayer}"
+                          Loaded="VideoViewProtected_OnLoaded" MediaPlayerChanged="VideoViewProtected_OnMediaPlayerChanged"/>
 
         <Label Grid.Row="1" x:Name="VideoTitle" HorizontalOptions="CenterAndExpand"/>
 
@@ -41,11 +43,13 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
             <Button Grid.Column="0" x:Name="PlayButton" Clicked="PlayButton_OnClicked" Text="Play" HorizontalOptions="FillAndExpand"/>
             <Button Grid.Column="1" x:Name="PlayRandomButton" Clicked="PlayRandomButton_OnClicked" Text="Play Random" HorizontalOptions="FillAndExpand"/>
             <Button Grid.Column="2" x:Name="StopButton" Clicked="StopButton_OnClicked" Text="Stop" HorizontalOptions="FillAndExpand"/>
+            <Button Grid.Column="3" x:Name="FileButton" Clicked="FileButton_OnClicked" Text="File" HorizontalOptions="FillAndExpand"/>
 
         </Grid>
 

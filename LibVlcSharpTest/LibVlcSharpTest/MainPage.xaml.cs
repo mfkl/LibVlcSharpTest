@@ -2,25 +2,37 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
+using LibVlcSharpTest.ViewModels;
 using LibVlcSharpTest.Views;
 using LibVLCSharp.Shared;
+using Plugin.FilePicker;
+using Plugin.FilePicker.Abstractions;
+using Plugin.Permissions;
+using Plugin.Permissions.Abstractions;
 using Xamarin.Forms;
 
 namespace LibVlcSharpTest
 {
     public partial class MainPage : ContentPage
     {
-        public MediaPlayer MediaPlayer => videoView.MediaPlayer;
         public MediaPlayerTimeSliderView MediaPlayerTimeSlider => MediaPlayerTimeSliderProtected;
 
+        private readonly MediaPlayerViewModel _mediaPlayerViewModel;
         private readonly List<Video> _playItems = Video.GetList();
 
         private int _lastRandom = -1;
         private bool _secondRun;
 
+        public LibVLC LibVlc => _mediaPlayerViewModel.LibVlc;
+        public MediaPlayer MediaPlayer => _mediaPlayerViewModel.MediaPlayer;
+
         public MainPage()
         {
             InitializeComponent();
+
+            _mediaPlayerViewModel = new MediaPlayerViewModel();
+            BindingContext = _mediaPlayerViewModel;
         }
 
         protected override void OnAppearing()
@@ -33,6 +45,27 @@ namespace LibVlcSharpTest
             if (_secondRun) return;
 
             _secondRun = true;
+            
+            _mediaPlayerViewModel.Initialize();
+
+            MediaPlayerTimeSlider.MainPage_OnAppearing();
+        }
+
+        protected override void OnDisappearing()
+        {
+            Debug.WriteLine("OnDisappearing");
+            
+            MediaPlayer?.Stop();
+        }
+
+        private void VideoViewProtected_OnLoaded(object sender, EventArgs e)
+        {
+            Debug.WriteLine("VideoView Loaded");
+        }
+
+        private void VideoViewProtected_OnMediaPlayerChanged(object sender, MediaPlayerChangedEventArgs e)
+        {
+            Debug.WriteLine("MediaPlayer Changed");
 
             MediaPlayer.MediaChanged += MediaPlayer_MediaChanged;
             MediaPlayer.TimeChanged += MediaPlayer_TimeChanged;
@@ -44,15 +77,6 @@ namespace LibVlcSharpTest
             MediaPlayer.EndReached += MediaPlayer_EndReached;
             MediaPlayer.EncounteredError += MediaPlayer_EncounteredError;
             MediaPlayer.LengthChanged += MediaPlayer_LengthChanged;
-
-            MediaPlayerTimeSlider.MainPage_OnAppearing();
-        }
-
-        protected override void OnDisappearing()
-        {
-            Debug.WriteLine("OnDisappearing");
-            
-            MediaPlayer.Stop();
         }
 
         private void MediaPlayer_MediaChanged(object sender, MediaPlayerMediaChangedEventArgs e)
@@ -183,7 +207,7 @@ namespace LibVlcSharpTest
             _lastRandom = ri;
 
             var media = new Media(
-                videoView.LibVLC, 
+                LibVlc, 
                 _playItems[ri].Mrl, 
                 _playItems[ri].Type == Video.Types.Url ? Media.FromType.FromLocation : Media.FromType.FromPath);
 
@@ -202,6 +226,25 @@ namespace LibVlcSharpTest
             Device.BeginInvokeOnMainThread(() => {
                 PlayButton.Text = "Pause";
             });
+        }
+
+        private async void FileButton_OnClicked(object sender, EventArgs e)
+        {
+
+            if (Device.RuntimePlatform == Device.Android && !await CheckPermissionsAsync()) return;
+
+            try
+            {
+                FileData fileData = await CrossFilePicker.Current.PickFile();
+
+                if (fileData == null) return;
+
+                Debug.WriteLine("FileName: " + fileData.FileName);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+            }
         }
 
         private void MediaStopped()
@@ -347,6 +390,44 @@ namespace LibVlcSharpTest
                         Type = Types.Url
                     }
                 };
+            }
+        }
+        
+        public async Task<bool> CheckPermissionsAsync()
+        {
+            try
+            {
+                var status = await CrossPermissions.Current.CheckPermissionStatusAsync(Permission.Storage);
+                if (status != PermissionStatus.Granted)
+                {
+                    if (await CrossPermissions.Current.ShouldShowRequestPermissionRationaleAsync(Permission.Storage))
+                    {
+                        await DisplayAlert("Player", "Storage permission is needed for file picking", "OK");
+                    }
+
+                    var results = await CrossPermissions.Current.RequestPermissionsAsync(Permission.Storage);
+
+                    if (results.ContainsKey(Permission.Storage))
+                    {
+                        status = results[Permission.Storage];
+                    }
+                }
+
+                if (status == PermissionStatus.Granted)
+                {
+                    return true;
+                }
+
+                if (status != PermissionStatus.Unknown)
+                {
+                    await DisplayAlert("Player", "Storage permission was denied.", "OK");
+                }
+
+                return false;
+            }
+            catch (Exception)
+            {
+                return false;
             }
         }
     }

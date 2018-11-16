@@ -25,16 +25,19 @@ namespace LibVlcSharpTest
         protected override void OnStart()
         {
             // Handle when your app starts
+            Debug.WriteLine("OnStart");
         }
 
         protected override void OnSleep()
         {
             // Handle when your app sleeps
+            Debug.WriteLine("OnSleep");
         }
 
         protected override void OnResume()
         {
             // Handle when your app resumes
+            Debug.WriteLine("OnResume");
         }
     }
 }
