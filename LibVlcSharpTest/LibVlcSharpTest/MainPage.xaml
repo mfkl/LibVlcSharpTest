@@ -15,11 +15,16 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <shared:VideoView x:Name="VideoView" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand" 
-                          MediaPlayer="{Binding MediaPlayer}"
-                          Loaded="VideoViewProtected_OnLoaded" MediaPlayerChanged="VideoViewProtected_OnMediaPlayerChanged"/>
+        <ContentView x:Name="VideoViewContentView">
+            <shared:VideoView x:Name="VideoView" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"
+                              MediaPlayer="{Binding MediaPlayer}"
+                              Loaded="VideoViewProtected_OnLoaded" MediaPlayerChanged="VideoViewProtected_OnMediaPlayerChanged"/>
+        </ContentView>
 
-        <Label Grid.Row="1" x:Name="VideoTitle" HorizontalOptions="CenterAndExpand"/>
+        <StackLayout Grid.Row="1" Orientation="Vertical">
+            <Label x:Name="VideoTitle" FontSize="20" HorizontalOptions="CenterAndExpand"/>
+            <Label x:Name="VideoState" HorizontalOptions="CenterAndExpand"/>
+        </StackLayout>
 
         <Grid Grid.Row="2">
 
@@ -44,12 +49,14 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
             <Button Grid.Column="0" x:Name="PlayButton" Clicked="PlayButton_OnClicked" Text="Play" HorizontalOptions="FillAndExpand"/>
             <Button Grid.Column="1" x:Name="PlayRandomButton" Clicked="PlayRandomButton_OnClicked" Text="Play Random" HorizontalOptions="FillAndExpand"/>
             <Button Grid.Column="2" x:Name="StopButton" Clicked="StopButton_OnClicked" Text="Stop" HorizontalOptions="FillAndExpand"/>
             <Button Grid.Column="3" x:Name="FileButton" Clicked="FileButton_OnClicked" Text="File" HorizontalOptions="FillAndExpand"/>
+            <Button Grid.Column="4" x:Name="PlayBunnyButton" Clicked="PlayBunnyButton_OnClicked" Text="Play Bunny" HorizontalOptions="FillAndExpand"/>
 
         </Grid>
 

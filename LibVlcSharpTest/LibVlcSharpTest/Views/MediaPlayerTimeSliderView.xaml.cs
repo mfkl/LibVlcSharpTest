@@ -26,7 +26,7 @@ namespace LibVlcSharpTest.Views
 
         private void MediaPlayer_TimeChanged(object sender, MediaPlayerTimeChangedEventArgs e)
         {
-            Debug.WriteLine("MediaPlayerTimeSliderView (I will be shown twice) Time Changed: " + e.Time);
+            Debug.WriteLine("MediaPlayerTimeSliderView Time Changed: " + e.Time);
 
             _timeSliderValueChangedOutside = true;
             

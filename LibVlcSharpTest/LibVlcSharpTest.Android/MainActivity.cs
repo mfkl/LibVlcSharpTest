@@ -20,6 +20,7 @@ namespace LibVlcSharpTest.Droid
             ToolbarResource = Resource.Layout.Toolbar;
 
             base.OnCreate(savedInstanceState);
+            Rg.Plugins.Popup.Popup.Init(this, savedInstanceState);
             LibVLCSharpFormsRenderer.Init();
 
             global::Xamarin.Forms.Forms.Init(this, savedInstanceState);

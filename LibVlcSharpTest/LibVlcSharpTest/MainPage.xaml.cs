@@ -2,14 +2,18 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using LibVlcSharpTest.Popups;
 using LibVlcSharpTest.ViewModels;
 using LibVlcSharpTest.Views;
+using LibVLCSharp.Forms.Shared;
 using LibVLCSharp.Shared;
 using Plugin.FilePicker;
 using Plugin.FilePicker.Abstractions;
 using Plugin.Permissions;
 using Plugin.Permissions.Abstractions;
+using Rg.Plugins.Popup.Services;
 using Xamarin.Forms;
 
 namespace LibVlcSharpTest
@@ -24,6 +28,8 @@ namespace LibVlcSharpTest
         private int _lastRandom = -1;
         private bool _secondRun;
 
+
+
         public LibVLC LibVlc => _mediaPlayerViewModel.LibVlc;
         public MediaPlayer MediaPlayer => _mediaPlayerViewModel.MediaPlayer;
 
@@ -33,6 +39,13 @@ namespace LibVlcSharpTest
 
             _mediaPlayerViewModel = new MediaPlayerViewModel();
             BindingContext = _mediaPlayerViewModel;
+        }
+
+        public void ReInitVideoOutput()
+        {
+            MediaPlayer?.Stop();
+
+            _mediaPlayerViewModel.Initialize();
         }
 
         protected override void OnAppearing()
@@ -45,7 +58,7 @@ namespace LibVlcSharpTest
             if (_secondRun) return;
 
             _secondRun = true;
-            
+
             _mediaPlayerViewModel.Initialize();
         }
 
@@ -77,6 +90,54 @@ namespace LibVlcSharpTest
             MediaPlayer.LengthChanged += MediaPlayer_LengthChanged;
 
             MediaPlayerTimeSlider.MainPage_OnMediaPlayerChanged();
+            
+            LibVlc.SetDialogHandlers(DisplayError, DisplayLogin, DisplayQuestion, DisplayProgress, UpdateProgress);
+        }
+
+        private Task DisplayError(string title, string text)
+        {
+            return Task.CompletedTask;
+        }
+
+        private Task DisplayLogin(Dialog dialog, string title, string text, string defaultusername, bool askstore, CancellationToken token)
+        {
+            var authenticationFormViewModel = new AuthenticationFormViewModel
+            {
+                Title = title,
+                Text = text,
+                Username = defaultusername
+            };
+
+            Device.BeginInvokeOnMainThread(async () => {
+                var page = new AuthenticationForm(authenticationFormViewModel, dialog);
+
+                page.Disappearing += (sender, args) =>
+                {
+                    if (!page.IsAuthenticated)
+                    {
+                        MediaPlayer.Stop();
+                    }
+                };
+
+                await PopupNavigation.Instance.PushAsync(page);
+            });
+
+            return Task.CompletedTask;
+        }
+
+        private Task DisplayQuestion(Dialog dialog, string title, string text, DialogQuestionType type, string canceltext, string firstactiontext, string secondactiontext, CancellationToken token)
+        {
+            return Task.CompletedTask;
+        }
+
+        private Task DisplayProgress(Dialog dialog, string title, string text, bool indeterminate, float position, string canceltext, CancellationToken token)
+        {
+            return Task.CompletedTask;
+        }
+
+        private Task UpdateProgress(Dialog dialog, float position, string text)
+        {
+            return Task.CompletedTask;
         }
 
         private void MediaPlayer_MediaChanged(object sender, MediaPlayerMediaChangedEventArgs e)
@@ -93,6 +154,10 @@ namespace LibVlcSharpTest
         private void Media_StateChanged(object sender, MediaStateChangedEventArgs e)
         {
             Debug.Write("Media State: " + e.State);
+            
+            Device.BeginInvokeOnMainThread(() => {
+                VideoState.Text = e.State.ToString();
+            });
         }
 
         private void Media_DurationChanged(object sender, MediaDurationChangedEventArgs e)
@@ -107,7 +172,7 @@ namespace LibVlcSharpTest
 
         private void MediaPlayer_TimeChanged(object sender, MediaPlayerTimeChangedEventArgs e)
         {
-            Debug.WriteLine("MainPage (I will be shown twice) Time Changed: " + e.Time);
+            Debug.WriteLine("MainPage Time Changed: " + e.Time);
             
             Device.BeginInvokeOnMainThread(() => {
                 MediaPlayerTime.Text = LongToTime(MediaPlayer.Time);
@@ -122,6 +187,11 @@ namespace LibVlcSharpTest
         private void MediaPlayer_Buffering(object sender, MediaPlayerBufferingEventArgs e)
         {
             Debug.WriteLine("Buffering: " + e.Cache);
+            
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                VideoState.Text = (e.Cache < 100) ? "Buffering... " + (int)e.Cache + "%" : MediaPlayer.Media.State.ToString();
+            });
 
             MediaPlaying();
         }
@@ -164,7 +234,7 @@ namespace LibVlcSharpTest
             Debug.WriteLine("Length Changed: " + e.Length);
             
             Device.BeginInvokeOnMainThread(() => {
-                MediaPlayerTimeSlider.Slider.Maximum = MediaPlayer.Length;
+                MediaPlayerTimeSlider.Slider.Maximum = MediaPlayer.Length < 1 ? 1 : MediaPlayer.Length;
                 MediaPlayerTimeSlider.Slider.IsEnabled = true;
 
                 MediaPlayerLength.Text = LongToTime(MediaPlayer.Length);
@@ -205,6 +275,9 @@ namespace LibVlcSharpTest
             }
 
             _lastRandom = ri;
+            
+            VideoTitle.Text = _playItems[ri].Title;
+            VideoState.Text = "";
 
             var media = new Media(
                 LibVlc, 
@@ -213,7 +286,6 @@ namespace LibVlcSharpTest
 
             MediaPlayer.Play(media);
 
-            VideoTitle.Text = _playItems[ri].Title;
         }
 
         private void StopButton_OnClicked(object sender, EventArgs e)
@@ -244,6 +316,18 @@ namespace LibVlcSharpTest
             {
                 Debug.WriteLine(ex);
             }
+        }
+        
+        private void PlayBunnyButton_OnClicked(object sender, EventArgs e)
+        {
+            var media = new Media(
+                LibVlc,
+                "http://ttv.tiskre.com/video/BigBuckBunny.mp4",
+                 Media.FromType.FromLocation);
+
+            MediaPlayer.Play(media);
+
+            VideoTitle.Text = "Big Buck Bunny";
         }
 
         private void MediaStopped()
@@ -387,7 +471,37 @@ namespace LibVlcSharpTest
                         Mrl =
                             "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WhatCarCanYouGetForAGrand.mp4",
                         Type = Types.Url
-                    }
+                    },
+//                    new Video()
+//                    {
+//                        Title = "CNN International",
+//                        Mrl = "http://ttv.tiskre.com:8005/channels/play?id=3089",
+//                        Type = Types.Url
+//                    },
+//                    new Video()
+//                    {
+//                        Title = "ABC NEWS HD",
+//                        Mrl = "http://ttv.tiskre.com:8005/channels/play?id=23462",
+//                        Type = Types.Url
+//                    },
+//                    new Video()
+//                    {
+//                        Title = "Bloomberg",
+//                        Mrl = "http://ttv.tiskre.com:8005/channels/play?id=8458",
+//                        Type = Types.Url
+//                    },
+//                    new Video()
+//                    {
+//                        Title = "France 24",
+//                        Mrl = "http://ttv.tiskre.com:8005/channels/play?id=6463",
+//                        Type = Types.Url
+//                    },
+//                    new Video()
+//                    {
+//                        Title = "Deutsche Welle",
+//                        Mrl = "http://ttv.tiskre.com:8005/channels/play?id=8780",
+//                        Type = Types.Url
+//                    }
                 };
             }
         }

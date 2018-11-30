@@ -31,7 +31,7 @@ namespace LibVlcSharpTest.ViewModels
             LibVlc = new LibVLC();
             Debug.WriteLine("LibVlc Created");
 
-            MediaPlayer = new MediaPlayer(LibVlc);
+            MediaPlayer = new MediaPlayer(LibVlc) { EnableKeyInput = true };
             Debug.WriteLine("MediaPlayer Created");
         }
 

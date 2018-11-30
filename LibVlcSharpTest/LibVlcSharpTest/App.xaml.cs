@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using LibVLCSharp.Forms.Shared;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -38,6 +39,8 @@ namespace LibVlcSharpTest
         {
             // Handle when your app resumes
             Debug.WriteLine("OnResume");
+
+            ((MainPage)MainPage).ReInitVideoOutput();
         }
     }
 }
