@@ -27,9 +27,7 @@ namespace LibVlcSharpTest
 
         private int _lastRandom = -1;
         private bool _secondRun;
-
-
-
+        
         public LibVLC LibVlc => _mediaPlayerViewModel.LibVlc;
         public MediaPlayer MediaPlayer => _mediaPlayerViewModel.MediaPlayer;
 
@@ -328,6 +326,12 @@ namespace LibVlcSharpTest
             MediaPlayer.Play(media);
 
             VideoTitle.Text = "Big Buck Bunny";
+        }
+        
+        private void GcButton_OnClicked(object sender, EventArgs e)
+        {
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
         }
 
         private void MediaStopped()
