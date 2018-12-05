@@ -14,17 +14,18 @@ namespace LibVlcSharpTest.Popups
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class AuthenticationForm : Rg.Plugins.Popup.Pages.PopupPage
     {
-        public bool IsAuthenticated;
+        public string Username { get; set; }
+        public string Password { get; set; }
+        public bool Store { get; set; }
+        public bool IsCompleted { get; set; }
 
         private readonly AuthenticationFormViewModel _authenticationFormViewModel;
-        private readonly Dialog _dialog;
 
-        public AuthenticationForm(AuthenticationFormViewModel authenticationFormViewModel, Dialog dialog)
+        public AuthenticationForm(AuthenticationFormViewModel authenticationFormViewModel)
         {
             InitializeComponent();
 
             _authenticationFormViewModel = authenticationFormViewModel;
-            _dialog = dialog;
 
             BindingContext = authenticationFormViewModel;
         }
@@ -33,9 +34,10 @@ namespace LibVlcSharpTest.Popups
         {
             if (await _authenticationFormViewModel.Validate())
             {
-                _dialog.PostLogin(_authenticationFormViewModel.Username, _authenticationFormViewModel.Password, _authenticationFormViewModel.Store);
-
-                IsAuthenticated = true;
+                Username = FormUsername.Text;
+                Password = FormPassword.Text;
+                Store = FormStore.IsToggled;
+                IsCompleted = true;
                 await PopupNavigation.Instance.PopAsync();
             }
         }

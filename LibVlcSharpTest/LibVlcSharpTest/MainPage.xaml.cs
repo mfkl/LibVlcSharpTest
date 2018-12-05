@@ -107,17 +107,20 @@ namespace LibVlcSharpTest
             };
 
             Device.BeginInvokeOnMainThread(async () => {
-                var page = new AuthenticationForm(authenticationFormViewModel, dialog);
+                var form = new AuthenticationForm(authenticationFormViewModel);
 
-                page.Disappearing += (sender, args) =>
+                form.Disappearing += (sender, args) =>
                 {
-                    if (!page.IsAuthenticated)
+                    if (form.IsCompleted)
                     {
+                        dialog.PostLogin(form.Username, form.Password, form.Store);
+                    }
+                    else {
                         MediaPlayer.Stop();
                     }
                 };
 
-                await PopupNavigation.Instance.PushAsync(page);
+                await PopupNavigation.Instance.PushAsync(form);
             });
 
             return Task.CompletedTask;
