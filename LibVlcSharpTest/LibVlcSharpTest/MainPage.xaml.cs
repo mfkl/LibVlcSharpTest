@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using LibVlcSharpTest.Popups;
 using LibVlcSharpTest.ViewModels;
 using LibVlcSharpTest.Views;
-using LibVLCSharp.Forms.Shared;
 using LibVLCSharp.Shared;
 using Plugin.FilePicker;
 using Plugin.FilePicker.Abstractions;
@@ -27,7 +29,9 @@ namespace LibVlcSharpTest
 
         private int _lastRandom = -1;
         private bool _secondRun;
-        
+        private Stream _memoryStream;
+        private VLCState _previousState;
+
         public LibVLC LibVlc => _mediaPlayerViewModel.LibVlc;
         public MediaPlayer MediaPlayer => _mediaPlayerViewModel.MediaPlayer;
 
@@ -58,6 +62,26 @@ namespace LibVlcSharpTest
             _secondRun = true;
 
             _mediaPlayerViewModel.Initialize();
+        }
+
+        private async void GetArchive()
+        {
+            Device.BeginInvokeOnMainThread(() => {
+                PlayAndDownloadButton.Text = "Downloading...";
+            });
+            
+            HttpClient client = new HttpClient();
+            using (Stream stream = await client.GetStreamAsync("http://1ttvapi.top/ttv.xmltv.xml.gz"),
+                unGZipStream = new GZipStream(stream, CompressionMode.Decompress))
+            {
+                _memoryStream = new MemoryStream();
+                await unGZipStream.CopyToAsync(_memoryStream);
+                _memoryStream.Position = 0;
+            }
+
+            Device.BeginInvokeOnMainThread(() => {
+                PlayAndDownloadButton.Text = "Downloaded";
+            });
         }
 
         protected override void OnDisappearing()
@@ -148,6 +172,8 @@ namespace LibVlcSharpTest
             MediaPlayer.Media.StateChanged += Media_StateChanged;
             MediaPlayer.Media.DurationChanged += Media_DurationChanged;
             MediaPlayer.Media.MetaChanged += Media_MetaChanged;
+            MediaPlayer.Media.MediaFreed += Media_MediaFreed;
+            MediaPlayer.Media.ParsedChanged += Media_ParsedChanged;
 
             MediaStopped();
         }
@@ -159,6 +185,11 @@ namespace LibVlcSharpTest
             Device.BeginInvokeOnMainThread(() => {
                 VideoState.Text = e.State.ToString();
             });
+
+            if (e.State != VLCState.Stopped)
+            {
+                _previousState = e.State;
+            }
         }
 
         private void Media_DurationChanged(object sender, MediaDurationChangedEventArgs e)
@@ -171,6 +202,16 @@ namespace LibVlcSharpTest
             Debug.WriteLine("Media Meta");
         }
 
+        private void Media_MediaFreed(object sender, MediaFreedEventArgs e)
+        {
+            Debug.WriteLine("Media Freed");
+        }
+
+        private void Media_ParsedChanged(object sender, MediaParsedChangedEventArgs e)
+        {
+            Debug.WriteLine("Media Parsed");
+        }
+
         private void MediaPlayer_TimeChanged(object sender, MediaPlayerTimeChangedEventArgs e)
         {
             Debug.WriteLine("MainPage Time Changed: " + e.Time);
@@ -178,6 +219,8 @@ namespace LibVlcSharpTest
             Device.BeginInvokeOnMainThread(() => {
                 MediaPlayerTime.Text = LongToTime(MediaPlayer.Time);
             });
+
+            Debug.WriteLine("Media State: " + MediaPlayer.Media.State);
         }
         
         private void MediaPlayer_Opening(object sender, EventArgs e)
@@ -218,6 +261,13 @@ namespace LibVlcSharpTest
             Debug.WriteLine("Stopped");
 
             MediaStopped();
+            
+            if (_previousState == VLCState.Ended)
+            {
+                Device.BeginInvokeOnMainThread(() => {
+                    MediaPlayer.Play(GetRandomMedia());
+                });
+            }
         }
 
         private void MediaPlayer_EndReached(object sender, EventArgs e)
@@ -265,7 +315,7 @@ namespace LibVlcSharpTest
             }
         }
 
-        private void PlayRandomButton_OnClicked(object sender, EventArgs e)
+        private Media GetRandomMedia()
         {
             var r = new Random();
             var ri = r.Next(0, _playItems.Count);
@@ -276,16 +326,19 @@ namespace LibVlcSharpTest
             }
 
             _lastRandom = ri;
-            
+
             VideoTitle.Text = _playItems[ri].Title;
             VideoState.Text = "";
 
-            var media = new Media(
-                LibVlc, 
-                _playItems[ri].Mrl, 
+            return new Media(
+                LibVlc,
+                _playItems[ri].Mrl,
                 _playItems[ri].Type == Video.Types.Url ? Media.FromType.FromLocation : Media.FromType.FromPath);
+        }
 
-            MediaPlayer.Play(media);
+        private void PlayRandomButton_OnClicked(object sender, EventArgs e)
+        {
+            MediaPlayer.Play(GetRandomMedia());
 
         }
 
@@ -318,23 +371,27 @@ namespace LibVlcSharpTest
                 Debug.WriteLine(ex);
             }
         }
-        
+
+        private async void PlayAndDownloadButton_OnClicked(object sender, EventArgs e)
+        {
+            MediaPlayer.Play(GetRandomMedia());
+
+            // Give time for MediaPlayer to play 2 seconds
+            await Task.Delay(2000);
+
+            GetArchive();
+        }
+
         private void PlayBunnyButton_OnClicked(object sender, EventArgs e)
         {
             var media = new Media(
                 LibVlc,
-                "http://ttv.tiskre.com/video/BigBuckBunny.mp4",
+                "https://ttv.tiskre.com/video/BigBuckBunny.mp4",
                  Media.FromType.FromLocation);
 
             MediaPlayer.Play(media);
 
             VideoTitle.Text = "Big Buck Bunny";
-        }
-        
-        private void GcButton_OnClicked(object sender, EventArgs e)
-        {
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
         }
 
         private void MediaStopped()

@@ -20,7 +20,7 @@ namespace LibVlcSharpTest.ViewModels
 
         public Task<bool> Validate()
         {
-            var result = !string.IsNullOrWhiteSpace(Username) && !string.IsNullOrWhiteSpace(Password);
+            var result = !string.IsNullOrWhiteSpace(Username);
 
             return Task.FromResult(result);
         }

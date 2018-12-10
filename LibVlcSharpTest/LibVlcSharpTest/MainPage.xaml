@@ -49,16 +49,12 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
             <Button Grid.Column="0" x:Name="PlayButton" Clicked="PlayButton_OnClicked" Text="Play" HorizontalOptions="FillAndExpand"/>
             <Button Grid.Column="1" x:Name="PlayRandomButton" Clicked="PlayRandomButton_OnClicked" Text="Play Random" HorizontalOptions="FillAndExpand"/>
             <Button Grid.Column="2" x:Name="StopButton" Clicked="StopButton_OnClicked" Text="Stop" HorizontalOptions="FillAndExpand"/>
-            <Button Grid.Column="3" x:Name="FileButton" Clicked="FileButton_OnClicked" Text="File" HorizontalOptions="FillAndExpand"/>
-            <Button Grid.Column="4" x:Name="PlayBunnyButton" Clicked="PlayBunnyButton_OnClicked" Text="Play Bunny" HorizontalOptions="FillAndExpand"/>
-            <Button Grid.Column="5" x:Name="GcButton" Clicked="GcButton_OnClicked" Text="GC" HorizontalOptions="FillAndExpand"/>
+            <Button Grid.Column="3" x:Name="PlayAndDownloadButton" Clicked="PlayAndDownloadButton_OnClicked" Text="Play and Download" HorizontalOptions="FillAndExpand"/>
 
         </Grid>
 
