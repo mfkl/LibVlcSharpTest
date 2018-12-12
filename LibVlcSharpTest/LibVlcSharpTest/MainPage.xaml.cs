@@ -121,13 +121,13 @@ namespace LibVlcSharpTest
             return Task.CompletedTask;
         }
 
-        private Task DisplayLogin(Dialog dialog, string title, string text, string defaultusername, bool askstore, CancellationToken token)
+        private Task DisplayLogin(Dialog dialog, string title, string text, string defaultUsername, bool askstore, CancellationToken token)
         {
             var authenticationFormViewModel = new AuthenticationFormViewModel
             {
                 Title = title,
                 Text = text,
-                Username = defaultusername
+                Username = defaultUsername
             };
 
             Device.BeginInvokeOnMainThread(async () => {
@@ -372,13 +372,10 @@ namespace LibVlcSharpTest
             }
         }
 
-        private async void PlayAndDownloadButton_OnClicked(object sender, EventArgs e)
+        private void PlayAndDownloadButton_OnClicked(object sender, EventArgs e)
         {
             MediaPlayer.Play(GetRandomMedia());
-
-            // Give time for MediaPlayer to play 2 seconds
-            await Task.Delay(2000);
-
+            
             GetArchive();
         }
 
