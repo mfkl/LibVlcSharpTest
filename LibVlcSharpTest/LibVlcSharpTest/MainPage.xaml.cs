@@ -31,6 +31,7 @@ namespace LibVlcSharpTest
         private bool _secondRun;
         private Stream _memoryStream;
         private VLCState _previousState;
+        private AuthenticationFormViewModel _authenticationFormViewModel;
 
         public LibVLC LibVlc => _mediaPlayerViewModel.LibVlc;
         public MediaPlayer MediaPlayer => _mediaPlayerViewModel.MediaPlayer;
@@ -123,21 +124,23 @@ namespace LibVlcSharpTest
 
         private Task DisplayLogin(Dialog dialog, string title, string text, string defaultUsername, bool askstore, CancellationToken token)
         {
-            var authenticationFormViewModel = new AuthenticationFormViewModel
+            if (_authenticationFormViewModel == null)
             {
-                Title = title,
-                Text = text,
-                Username = defaultUsername
-            };
+                _authenticationFormViewModel = new AuthenticationFormViewModel();
+            }
 
+            _authenticationFormViewModel.Title = title;
+            _authenticationFormViewModel.Text = text;
+            _authenticationFormViewModel.Username = defaultUsername;
+            
             Device.BeginInvokeOnMainThread(async () => {
-                var form = new AuthenticationForm(authenticationFormViewModel);
+                var form = new AuthenticationForm(_authenticationFormViewModel);
 
                 form.Disappearing += (sender, args) =>
                 {
                     if (form.IsCompleted)
                     {
-                        dialog.PostLogin(form.Username, form.Password, form.Store);
+                        dialog.PostLogin(_authenticationFormViewModel.Username, _authenticationFormViewModel.Password, _authenticationFormViewModel.Store);
                     }
                     else {
                         MediaPlayer.Stop();

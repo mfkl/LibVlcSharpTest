@@ -10,7 +10,7 @@ namespace LibVlcSharpTest.ViewModels
         public string Title { get; set; }
         public string Text { get; set; }
         public string Username { get; set; }
-        public string Password { get; set; }
+        public string Password { get; set; } = "";
         public bool Store { get; set; }
 
         public AuthenticationFormViewModel()
