@@ -172,12 +172,6 @@ namespace LibVlcSharpTest
         {
             Debug.WriteLine("Media Changed: " + MediaPlayer.Media.Mrl);
 
-            MediaPlayer.Media.StateChanged += Media_StateChanged;
-            MediaPlayer.Media.DurationChanged += Media_DurationChanged;
-            MediaPlayer.Media.MetaChanged += Media_MetaChanged;
-            MediaPlayer.Media.MediaFreed += Media_MediaFreed;
-            MediaPlayer.Media.ParsedChanged += Media_ParsedChanged;
-
             MediaStopped();
         }
 
@@ -333,10 +327,14 @@ namespace LibVlcSharpTest
             VideoTitle.Text = _playItems[ri].Title;
             VideoState.Text = "";
 
-            return new Media(
+            var media =  new Media(
                 LibVlc,
                 _playItems[ri].Mrl,
                 _playItems[ri].Type == Video.Types.Url ? Media.FromType.FromLocation : Media.FromType.FromPath);
+
+            SubscribeToMediaEvents(media);
+
+            return media;
         }
 
         private void PlayRandomButton_OnClicked(object sender, EventArgs e)
@@ -389,9 +387,20 @@ namespace LibVlcSharpTest
                 "https://ttv.tiskre.com/video/BigBuckBunny.mp4",
                  Media.FromType.FromLocation);
 
+            SubscribeToMediaEvents(media);
+            
             MediaPlayer.Play(media);
 
             VideoTitle.Text = "Big Buck Bunny";
+        }
+
+        private void SubscribeToMediaEvents(Media media)
+        {
+            media.StateChanged += Media_StateChanged;
+            media.DurationChanged += Media_DurationChanged;
+            media.MetaChanged += Media_MetaChanged;
+            media.MediaFreed += Media_MediaFreed;
+            media.ParsedChanged += Media_ParsedChanged;
         }
 
         private void MediaStopped()
