@@ -327,12 +327,10 @@ namespace LibVlcSharpTest
             VideoTitle.Text = _playItems[ri].Title;
             VideoState.Text = "";
 
-            var media =  new Media(
+            var media = new Media(
                 LibVlc,
                 _playItems[ri].Mrl,
                 _playItems[ri].Type == Video.Types.Url ? Media.FromType.FromLocation : Media.FromType.FromPath);
-
-            SubscribeToMediaEvents(media);
 
             return media;
         }
@@ -373,10 +371,19 @@ namespace LibVlcSharpTest
             }
         }
 
+        Media _media;
         private void PlayAndDownloadButton_OnClicked(object sender, EventArgs e)
         {
-            MediaPlayer.Play(GetRandomMedia());
-            
+            _media = GetRandomMedia();
+
+            _media.StateChanged += Media_StateChanged;
+            _media.DurationChanged += Media_DurationChanged;
+            _media.MetaChanged += Media_MetaChanged;
+            _media.MediaFreed += Media_MediaFreed;
+            _media.ParsedChanged += Media_ParsedChanged;
+
+            MediaPlayer.Play(_media);
+
             GetArchive();
         }
 
@@ -387,20 +394,11 @@ namespace LibVlcSharpTest
                 "https://ttv.tiskre.com/video/BigBuckBunny.mp4",
                  Media.FromType.FromLocation);
 
-            SubscribeToMediaEvents(media);
+   //         SubscribeToMediaEvents(ref media);
             
             MediaPlayer.Play(media);
 
             VideoTitle.Text = "Big Buck Bunny";
-        }
-
-        private void SubscribeToMediaEvents(Media media)
-        {
-            media.StateChanged += Media_StateChanged;
-            media.DurationChanged += Media_DurationChanged;
-            media.MetaChanged += Media_MetaChanged;
-            media.MediaFreed += Media_MediaFreed;
-            media.ParsedChanged += Media_ParsedChanged;
         }
 
         private void MediaStopped()
